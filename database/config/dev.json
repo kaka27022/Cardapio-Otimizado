@@ -1,0 +1,7 @@
+{
+  "database": "diet_dev",
+  "host": "localhost",
+  "port": 3306,
+  "user": "dev_user",
+  "password": "dev123"
+}

@@ -1,0 +1,7 @@
+{
+  "database": "diet_prod",
+  "host": "db-server",
+  "port": 3306,
+  "user": "prod_user",
+  "password": "Pr0d!2023"
+}
