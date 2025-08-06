@@ -1,4 +1,16 @@
-def test_recipe_search():
-    db = DatabaseService(test_config)
-    recipes = db.get_recipes_by_ingredients([1, 2])
-    assert len(recipes) > 0
+# src/tests/test_queries.py
+
+from services.RecipeService import RecipeService
+
+def test_filtragem_receitas_vegana_sem_lactose():
+    ingredientes = ['banana', 'aveia', 'amendoim']
+    restricoes = ['vegana', 'sem_lactose']
+    categorias = ['café', 'almoço']
+
+    service = RecipeService()
+    result = service.get_receitas_filtradas(ingredientes, restricoes, categorias)
+
+    assert 'café' in result
+    for receita in result['café']:
+        assert receita.vegano is True
+        assert receita.sem_lactose is True
