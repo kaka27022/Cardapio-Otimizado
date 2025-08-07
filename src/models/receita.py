@@ -4,3 +4,6 @@ class Receita:
         self.nome = nome
         self.ingredientes = ingredientes  # lista de strings
         self.restricoes = restricoes      # lista de strings (ex: ["sem_lactose"])
+
+    def __repr__(self):
+        return f"<Receita {self.nome}>"

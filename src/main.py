@@ -1,26 +1,38 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))  # raiz do projeto
 
+from db.receitas import buscar_receitas
+from services.gerador_cardapio import gerar_cardapio
 
-from src.db.receitas import buscar_receitas
-from src.services.gerador_cardapio import gerar_cardapio
+def obter_lista_usuario(msg):
+    """
+    Recebe uma string de entrada do usuário e transforma em lista.
+    Exemplo: "arroz, tomate, cebola" → ["arroz", "tomate", "cebola"]
+    """
+    entrada = input(msg)
+    return [item.strip().lower() for item in entrada.split(",") if item.strip()]
 
 def main():
-    print("Bem-vindo ao Otimizador de Cardápios!")
-    
-    ingredientes_input = input("Digite os ingredientes disponíveis (separados por vírgula): ")
-    restricoes_input = input("Digite suas restrições alimentares (ex: vegano, sem_lactose): ")
+    print("=== Gerador de Cardápio Otimizado ===\n")
 
-    ingredientes = [i.strip().lower() for i in ingredientes_input.split(",")]
-    restricoes = [r.strip().lower() for r in restricoes_input.split(",")]
+    # 1. Obter entradas do usuário
+    ingredientes_disponiveis = obter_lista_usuario("Digite os ingredientes disponíveis (separados por vírgula): ")
+    restricoes_usuario = obter_lista_usuario("Digite suas restrições alimentares (ex: sem_lactose, vegano, etc): ")
 
+    # 2. Buscar receitas do banco
     receitas = buscar_receitas()
-    cardapio = gerar_cardapio(receitas, ingredientes, restricoes)
 
-    print("\nReceitas recomendadas:")
-    for r in cardapio:
-        print(f"- {r.nome} (ingredientes: {', '.join(r.ingredientes)})")
+    # 3. Gerar cardápio
+    cardapio = gerar_cardapio(receitas, ingredientes_disponiveis, restricoes_usuario)
+
+    # 4. Mostrar resultado
+    print("\n=== Cardápio Gerado ===")
+    if cardapio:
+        for receita in cardapio:
+            print(f"- {receita.nome}")
+    else:
+        print("Nenhuma receita encontrada com os ingredientes e restrições fornecidos.")
 
 if __name__ == "__main__":
     main()
