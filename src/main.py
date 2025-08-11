@@ -13,26 +13,80 @@ def obter_lista_usuario(msg):
     entrada = input(msg)
     return [item.strip().lower() for item in entrada.split(",") if item.strip()]
 
+def obter_limite(msg):
+    entrada = input(msg).strip()
+    if not entrada:
+        return None
+    try:
+        valor = float(entrada)
+        if valor < 0:
+            print("Por favor, insira um valor positivo ou deixe em branco.")
+            return obter_limite(msg)
+        return valor
+    except ValueError:
+        print("Valor inválido. Insira um número ou deixe em branco.")
+        return obter_limite(msg)
+
 def main():
     print("=== Gerador de Cardápio Otimizado ===\n")
 
-    # 1. Obter entradas do usuário
     ingredientes_disponiveis = obter_lista_usuario("Digite os ingredientes disponíveis (separados por vírgula): ")
     restricoes_usuario = obter_lista_usuario("Digite suas restrições alimentares (ex: sem_lactose, vegano, etc): ")
 
-    # 2. Buscar receitas do banco
-    receitas = buscar_receitas()
+    print("\nOpcional: Defina limites para o cardápio (deixe em branco para pular)")
+    limite_calorias = obter_limite("Limite máximo de calorias: ")
+    limite_proteinas = obter_limite("Limite máximo de proteínas: ")
+    limite_gorduras = obter_limite("Limite máximo de gorduras: ")
 
-    # 3. Gerar cardápio
+    receitas = buscar_receitas()
     cardapio = gerar_cardapio(receitas, ingredientes_disponiveis, restricoes_usuario)
 
-    # 4. Mostrar resultado
-    print("\n=== Cardápio Gerado ===")
-    if cardapio:
-        for receita in cardapio:
-            print(f"- {receita.nome}")
-    else:
-        print("Nenhuma receita encontrada com os ingredientes e restrições fornecidos.")
+    total_calorias = 0
+    total_proteinas = 0
+    total_gorduras = 0
+
+    cardapio_filtrado = {k: [] for k in cardapio.keys()}
+
+    def cabe_no_limite(r):
+        c = total_calorias + (r.calorias or 0)
+        p = total_proteinas + (r.proteinas or 0)
+        g = total_gorduras + (r.gorduras or 0)
+        if limite_calorias is not None and c > limite_calorias:
+            return False
+        if limite_proteinas is not None and p > limite_proteinas:
+            return False
+        if limite_gorduras is not None and g > limite_gorduras:
+            return False
+        return True
+
+    for tipo_refeicao, lista_receitas in cardapio.items():
+        for receita in lista_receitas:
+            if cabe_no_limite(receita):
+                cardapio_filtrado[tipo_refeicao].append(receita)
+                total_calorias += receita.calorias or 0
+                total_proteinas += receita.proteinas or 0
+                total_gorduras += receita.gorduras or 0
+
+    print("\n=== Cardápio Gerado Respeitando Limites Diários ===")
+    for refeicao, lista in cardapio_filtrado.items():
+        print(f"\n{refeicao.replace('_', ' ').title()}:")
+        if lista:
+            for receita in lista:
+                print(f"- {receita.nome}")
+                print(f"  Ingredientes: {', '.join(receita.ingredientes)}")
+                print(f"  Restrições: {', '.join(receita.restricoes) if receita.restricoes else 'Nenhuma'}")
+                print(f"  Calorias: {receita.calorias if receita.calorias is not None else 'Não informado'}")
+                print(f"  Proteínas: {receita.proteinas if receita.proteinas is not None else 'Não informado'}")
+                print(f"  Gorduras: {receita.gorduras if receita.gorduras is not None else 'Não informado'}\n")
+        else:
+            print("Nenhuma receita disponível para esta refeição.")
+
+    print("=== Resumo Total Nutricional do Cardápio ===")
+    print(f"Calorias totais: {total_calorias}")
+    print(f"Proteínas totais: {total_proteinas}")
+    print(f"Gorduras totais: {total_gorduras}")
+
 
 if __name__ == "__main__":
     main()
+

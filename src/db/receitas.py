@@ -10,9 +10,11 @@ def buscar_receitas():
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT r.id_receita, r.nome,
+        SELECT r.id_receita,
+               r.nome,
                ARRAY(
-                   SELECT i.nome FROM ingredientes i
+                   SELECT i.nome
+                   FROM ingredientes i
                    JOIN receita_ingredientes ri ON ri.id_ingrediente = i.id_ingrediente
                    WHERE ri.id_receita = r.id_receita
                ),
@@ -23,18 +25,28 @@ def buscar_receitas():
                    CASE WHEN r.vegetariano THEN 'vegetariano' ELSE NULL END,
                    CASE WHEN r.low_carb THEN 'low_carb' ELSE NULL END,
                    CASE WHEN r.high_protein THEN 'high_protein' ELSE NULL END
-               ]
+               ],
+               r.tipo_refeicao,
+               r.calorias_totais,
+               r.proteinas_totais,
+               r.gorduras_totais
         FROM receitas r
         WHERE r.ativo = TRUE;
     """)
 
     receitas = []
     for row in cursor.fetchall():
-        id_receita, nome, ingredientes, restricoes_raw = row
+        (id_receita, nome, ingredientes, restricoes_raw, tipo_refeicao,
+         calorias, proteinas, gorduras) = row
         restricoes = list(filter(None, restricoes_raw))  # remove Nones
-        receitas.append(Receita(id_receita, nome, ingredientes, restricoes))
+        receitas.append(Receita(
+            id_receita, nome, ingredientes, restricoes, tipo_refeicao,
+            calorias, proteinas, gorduras
+        ))
 
     cursor.close()
     conn.close()
     return receitas
+
+
 
