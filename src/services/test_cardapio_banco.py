@@ -26,7 +26,9 @@ def main():
             for receita in lista_receitas:
                 print(f"- {receita.nome} "
                       f"(ingredientes: {', '.join(receita.ingredientes)}, "
-                      f"restrições: {', '.join(receita.restricoes)})")
+                      f"restrições: {', '.join(receita.restricoes)}), "
+                      f"tempo preparo: {receita.tempo_preparo} min, "
+                      f"dificuldade: {receita.dificuldade}")
         else:
             print("Nenhuma receita disponível para esta refeição.\n")
 

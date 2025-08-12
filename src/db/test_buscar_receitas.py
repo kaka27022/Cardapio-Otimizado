@@ -13,6 +13,8 @@ def testar_buscar_receitas():
             print(f"  Tipo de refeição: {r.tipo_refeicao}")
             print(f"  Ingredientes: {', '.join(r.ingredientes)}")
             print(f"  Restrições: {', '.join(r.restricoes) if r.restricoes else 'Nenhuma'}")
+            print(f"  Tempo de Preparo: {r.tempo_preparo} min")
+            print(f"  Dificuldade: {r.dificuldade}")
             print(f"  Calorias: {r.calorias if hasattr(r, 'calorias') and r.calorias is not None else 'Não informado'}")
             print(f"  Proteínas: {r.proteinas if hasattr(r, 'proteinas') and r.proteinas is not None else 'Não informado'}")
             print(f"  Gorduras: {r.gorduras if hasattr(r, 'gorduras') and r.gorduras is not None else 'Não informado'}\n")

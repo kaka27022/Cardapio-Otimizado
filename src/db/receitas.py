@@ -27,6 +27,8 @@ def buscar_receitas():
                    CASE WHEN r.high_protein THEN 'high_protein' ELSE NULL END
                ],
                r.tipo_refeicao,
+               r.tempo_preparo,
+               r.dificuldade,
                r.calorias_totais,
                r.proteinas_totais,
                r.gorduras_totais
@@ -36,11 +38,11 @@ def buscar_receitas():
 
     receitas = []
     for row in cursor.fetchall():
-        (id_receita, nome, ingredientes, restricoes_raw, tipo_refeicao,
+        (id_receita, nome, ingredientes, restricoes_raw, tipo_refeicao, tempo_preparo, dificuldade,
          calorias, proteinas, gorduras) = row
         restricoes = list(filter(None, restricoes_raw))  # remove Nones
         receitas.append(Receita(
-            id_receita, nome, ingredientes, restricoes, tipo_refeicao,
+            id_receita, nome, ingredientes, restricoes, tipo_refeicao, tempo_preparo, dificuldade,
             calorias, proteinas, gorduras
         ))
 
