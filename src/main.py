@@ -1,15 +1,14 @@
 import sys
 import os
+import time
+import csv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))  # raiz do projeto
 
 from db.receitas import buscar_receitas
 from services.gerador_cardapio import gerar_cardapio
+from decimal import Decimal
 
 def obter_lista_usuario(msg):
-    """
-    Recebe uma string de entrada do usuário e transforma em lista.
-    Exemplo: "arroz, tomate, cebola" → ["arroz", "tomate", "cebola"]
-    """
     entrada = input(msg)
     return [item.strip().lower() for item in entrada.split(",") if item.strip()]
 
@@ -41,6 +40,16 @@ def obter_minimo(msg):
         print("Valor inválido. Insira um número ou deixe em branco.")
         return obter_minimo(msg)
 
+def salvar_metricas(satisfez, latencia, qualidade):
+    arquivo = "metricas.csv"
+    if not os.path.exists(arquivo):
+        with open(arquivo, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["satisfez_restricoes", "latencia", "qualidade_nutricional"])
+    with open(arquivo, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([int(satisfez), latencia, qualidade])
+
 def main():
     print("=== Gerador de Cardápio Otimizado ===\n")
 
@@ -52,6 +61,9 @@ def main():
     minimo_proteinas = obter_minimo("Mínimo de proteínas desejadas (total): ")
     limite_gorduras = obter_limite("Limite máximo de gorduras (total): ")
     limite_tempo_preparo = obter_limite("Limite máximo de tempo de preparo por receita (min): ")
+
+    # Início da contagem do tempo
+    inicio_tempo = time.time()
 
     receitas = buscar_receitas()
     cardapio = gerar_cardapio(receitas, ingredientes_disponiveis, restricoes_usuario)
@@ -66,15 +78,12 @@ def main():
         if limite_tempo_preparo is not None and r.tempo_preparo is not None:
             if r.tempo_preparo > limite_tempo_preparo:
                 return False
-
         c = total_calorias + (r.calorias or 0)
         g = total_gorduras + (r.gorduras or 0)
-
         if limite_calorias is not None and c > limite_calorias:
             return False
         if limite_gorduras is not None and g > limite_gorduras:
             return False
-
         return True
 
     for tipo_refeicao, lista_receitas in cardapio.items():
@@ -84,6 +93,37 @@ def main():
                 total_calorias += receita.calorias or 0
                 total_proteinas += receita.proteinas or 0
                 total_gorduras += receita.gorduras or 0
+
+    # Fim da contagem do tempo
+    fim_tempo = time.time()
+    latencia = fim_tempo - inicio_tempo
+
+    # Verifica satisfação das restrições
+    satisfez = True
+    if limite_calorias is not None and total_calorias > limite_calorias:
+        satisfez = False
+    if minimo_proteinas is not None and total_proteinas < minimo_proteinas:
+        satisfez = False
+    if limite_gorduras is not None and total_gorduras > limite_gorduras:
+        satisfez = False
+
+    limite_calorias = Decimal(str(limite_calorias)) if limite_calorias is not None else None
+    minimo_proteinas = Decimal(str(minimo_proteinas)) if minimo_proteinas is not None else None
+    limite_gorduras = Decimal(str(limite_gorduras)) if limite_gorduras is not None else None
+
+
+    # Calcula qualidade nutricional (distância normalizada das metas)
+    distancias = []
+    if limite_calorias is not None:
+        distancias.append(abs(total_calorias - limite_calorias) / limite_calorias)
+    if minimo_proteinas is not None:
+        distancias.append(abs(total_proteinas - minimo_proteinas) / minimo_proteinas)
+    if limite_gorduras is not None:
+        distancias.append(abs(total_gorduras - limite_gorduras) / limite_gorduras)
+    qualidade = sum(distancias) / len(distancias) if distancias else 0
+
+    # Salva métricas
+    salvar_metricas(satisfez, latencia, qualidade)
 
     print("\n=== Cardápio Gerado Respeitando Limites ===")
     for refeicao, lista in cardapio_filtrado.items():
@@ -109,7 +149,6 @@ def main():
     if minimo_proteinas is not None and total_proteinas < minimo_proteinas:
         print("\n⚠ AVISO: O cardápio gerado não atingiu o mínimo de proteínas desejado.")
         print("Sugestão: aumente a porção ou adicione mais receitas com maior teor proteico.")
-        # Encontrar receita mais proteica
         mais_proteica = max(
             (r for lista in cardapio_filtrado.values() for r in lista),
             key=lambda r: r.proteinas or 0,
@@ -120,4 +159,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
