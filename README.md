@@ -111,3 +111,9 @@ O sistema combina:
 - Interface mais intuitiva.
 
 ---
+
+## 👥 Autores
+- Augusto Luna *(DECOM)* 
+- Luiz Victor Silva *(DECOM)*
+- [Maria Clara Perpetuo](https://github.com/kaka27022)
+
