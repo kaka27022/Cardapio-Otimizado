@@ -105,11 +105,6 @@ O sistema combina:
 - Triggers para integridade automática.
 - Redução de ajustes manuais.
 
-**Próximos passos:**
-- Novos parâmetros de otimização.
-- Integração com APIs externas.
-- Interface mais intuitiva.
-
 ---
 
 ## 👥 Autores
