@@ -113,7 +113,7 @@ O sistema combina:
 ---
 
 ## 👥 Autores
-- Augusto Luna *(DECOM)* 
-- Luiz Victor Silva *(DECOM)*
-- [Maria Clara Perpetuo](https://github.com/kaka27022)
+- [Augusto Luna]() *(UFOP)* 
+- [Luiz Victor Silva]() *(UFOP)* 
+- [Maria Clara Perpetuo](https://github.com/kaka27022) *(UFOP)* 
 
